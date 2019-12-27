@@ -12,44 +12,28 @@ RUN apt-get update && \
     # base depends
     DEBIAN_FRONTEND=noninteractive apt-get install -y locales net-tools iputils-ping iproute2 sysstat iotop tcpdump tcpick bwm-ng tree strace screen rsync inotify-tools socat wget curl \
     openssh-server openssh-client build-essential automake make autoconf libpcre3-dev software-properties-common supervisor sudo git vim emacs python-minimal fontconfig ssmtp mailutils \
-    bash-completion less unzip\
-    # stack services depends
-    apache2 apache2-utils mysql-client mysql-server libapache2-mod-php libapache2-mod-geoip geoip-database \
-    # php depends
-    php \
-    php-bcmath \
-    php-cli \
-    php-curl \
-    php-dba \
-    php-dev \
-    php-enchant \
-    php-gd \
-    php-gd \
-    php-gmp \
-    php-imap \
-    php-interbase \
-    php-intl \
-    php-json \
-    php-ldap \
-    php-mbstring \
-    php-memcache \
-    php-mysql \
-    php-odbc \
-    php-opcache \
-    php-pear \
-    php-pgsql \
-    php-pspell \
-    php-pspell \
-    php-readline \
-    php-recode \
-    #php-snmp \
-    php-soap \
-    php-sqlite3 \
-    php-tidy \
-    php-xdebug \
-    php-xml \
-    php-xmlrpc \
-    php-zip
+    bash-completion less unzip \
+    # stack services depends 
+    apache2 apache2-utils mysql-client mysql-server 
+
+    #clean apt
+RUN rm -rf /var/lib/apt/lists/*
+
+#Install php 7.2
+RUN apt-get update &&  \
+    apt install -y ca-certificates apt-transport-https && \
+    wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add - && \
+    echo "deb https://packages.sury.org/php/ stretch main" | sudo tee /etc/apt/sources.list.d/php.list && \
+    apt-get update && \
+    apt install -y php7.2 && \
+    apt install -y php7.2-cli php7.2-common php7.2-curl php7.2-mbstring php7.2-mysql php7.2-xml php7.2-dev libapache2-mod-php7.2 libapache2-mod-geoip geoip-database
+
+RUN apt-get install -y php-xdebug php7.2-bcmath && \
+    wget http://ftp.cz.debian.org/debian/pool/main/libj/libjpeg-turbo/libjpeg62-turbo_1.5.1-2_amd64.deb && \
+    wget http://ftp.ee.debian.org/debian/pool/main/libw/libwebp/libwebp6_0.5.2-1_amd64.deb && \
+    dpkg -i libjpeg62-turbo_1.5.1-2_amd64.deb libwebp6_0.5.2-1_amd64.deb && \
+    apt-get install -y php7.2-gd
+
 
 RUN locale-gen $LOCALE && update-locale LANG=$LOCALE
 
@@ -67,7 +51,7 @@ RUN mkdir -p /var/run/mysqld && \
 # Setup Apache
 RUN mkdir -p /var/run/apache2 && \
     chown -R www-data: /var/run/apache2 && \
-    a2enmod actions alias authz_host deflate dir expires headers mime rewrite ssl php7.0 proxy proxy_http && \
+    a2enmod actions alias authz_host deflate dir expires headers mime rewrite ssl php7.2 proxy proxy_http && \
     mv /etc/apache2/sites-enabled /etc/apache2/sites-enabled.dist
 
 # Setup ssh
